@@ -1,0 +1,38 @@
+{% extends "tienda/base.html" %}
+{% load static %}
+
+{% block title %}
+Detalle de Compra
+{% endblock %}
+
+{% block content %}
+<div class="detalle">
+    <h2>Detalle de Compra</h2>
+
+    <div class="detalle_info">
+        <p><strong>Proveedor:</strong> {{ compra.nombre_proveedor}}</p>
+        <p><strong>Fecha:</strong> {{ compra.fecha }}</p>
+        <p><strong>Total $:</strong> {{ compra.Total }}</p>
+    </div>
+
+    <hr>
+
+    <h3>Productos Comprados</h3>
+    <ul class="detalle_productos">
+        {% for producto in productos %}
+            <li>
+                <p><strong>Producto:</strong> {{ producto.nombre }}</p>
+                <p><strong>Tipo:</strong> <td>{{ producto.tipo }}</td>
+                <p><strong>Cantidad:</strong> {{ producto.cantidad }} {{ producto.tipo_cantidad }}</p>
+            </li>
+        {% endfor %}
+    </ul>
+
+    <div class="detalle_total">
+        <p><strong>Total Compra $:</strong> {{ compra.Total }}</p>
+    </div>
+</div>
+<div class="boton_volver">
+    <a href="{% url 'ver_compras'%}" class="btn btn-danger">Volver</a>
+</div>
+{% endblock %}

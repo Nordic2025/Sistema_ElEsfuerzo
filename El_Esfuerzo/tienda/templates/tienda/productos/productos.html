@@ -1,0 +1,126 @@
+{% extends "tienda/base.html" %}
+{% load static %}
+
+{% block title %}
+Productos
+{% endblock %}
+
+{% block content %}
+
+<body>
+    <h1 class="h1_global">Productos</h1>
+    <div class="alert" role="alert" style="width: 70%; margin: auto; background-color: #545454; color: white;">
+        <h5>Leyenda:</h5>
+        Productos con Stock Bajo: <i class="fas fa-exclamation-circle" style="color: red;"></i><br>
+        Productos con Stock Medio: <i class="fas fa-warning" style="color: yellow;"></i><br>
+        Productos con Stock Suficiente: <i class="fas fa-check-circle" style="color: rgb(7, 192, 7);"></i><br>
+    </div>
+    <section class="tabla_global">
+        <div class="botones_superiores d-flex justify-content-between align-items-center">
+            <a href="{% url 'agregar_producto' %}" class="btn_accion_productos">Agregar Productos</a>
+            <form class="d-flex" role="search">
+                <input class="form-control me-2" type="search" id="buscador" placeholder="Buscar producto..."
+                    aria-label="Search">
+                <button class="btn btn-success" type="button" id="btnBuscar">Buscar</button>
+            </form>
+        </div>
+        <div class="overflow-auto">
+            <table class="table table-borderless">
+                <thead>
+                    <tr>
+                        <th>Nombre</th>
+                        <th>Tipo</th>
+                        <th>Precio</th>
+                        <th>Cantidad</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for producto in productos %}
+                    <tr>
+                        <td>{{producto.nombre}}</td>
+                        <td>{{producto.get_tipo_display}}</td>
+                        <td>{{producto.precio}}</td>
+                        <td>{{ producto.cantidad }} {{ producto.get_tipo_cantidad_display }}
+                            {% if producto.cantidad <= 10 %}
+                                <i class="fas fa-exclamation-circle" style="color: red;" title="Stock Bajo"></i>
+                            {% endif %}
+                            {% if producto.cantidad >= 11 and producto.cantidad <= 50 %}
+                            <i class="fas fa-warning" style="color: yellow;" title="Stock Medio"></i>
+                            {% endif %}
+                            {% if producto.cantidad > 50 %}
+                            <i class="fas fa-check-circle" style="color: rgb(7, 192, 7);" title="Stock Suficiente"></i>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <a href="{% url 'editar_producto' producto.id %}"><button
+                                    class="btn btn_editar">Editar</button></a>
+                            <a href="{% url 'eliminar_producto' producto.id%}"
+                                onclick="return confirm ('¿Esta seguro de que desea eliminar este producto? Puede afectar al apartado de Ventas.');"><button
+                                    class="btn btn_eliminar">Eliminar</button></a>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="6"> No hay productos registrados.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </section>
+
+    <script>
+        function filtrarProductos() {
+            const searchTerm = document.getElementById('buscador').value.toLowerCase();
+            const filas = document.querySelectorAll('tbody tr');
+
+            filas.forEach(fila => {
+                const nombre = fila.querySelector('td:first-child').textContent.toLowerCase();
+                const tipo = fila.querySelector('td:nth-child(2)').textContent.toLowerCase();
+
+                if (nombre.includes(searchTerm) || tipo.includes(searchTerm)) {
+                    fila.style.display = '';
+                } else {
+                    fila.style.display = 'none';
+                }
+            });
+        }
+
+        // Filtrar al escribir
+        document.getElementById('buscador').addEventListener('keyup', filtrarProductos);
+
+        // Filtrar al hacer clic en el botón
+        document.getElementById('btnBuscar').addEventListener('click', function (e) {
+            e.preventDefault();
+            filtrarProductos();
+        });
+        function mensaje(tipo, mensaje) {
+            const Toast = Swal.mixin({
+                toast: true,
+                position: 'top-end',
+                showConfirmButton: false,
+                timerProgressBar: true,
+                width: '280px'
+            });
+
+            if (tipo === 'success') {
+                Toast.fire({
+                    icon: 'success',
+                    title: mensaje,
+                    timer: 1500
+                });
+            } else if (tipo === 'warning') {
+                setTimeout(() => {
+                    Toast.fire({
+                        icon: 'warning',
+                        title: 'Productos con Stock Bajo',
+                        text: mensaje,
+                        timer: 6000
+                    });
+                }, 2000);
+            }
+        }
+    </script>
+</body>
+{% endblock %}

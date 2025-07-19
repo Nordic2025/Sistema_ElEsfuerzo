@@ -1,0 +1,54 @@
+{% extends 'tienda/base.html' %}
+{% load static %}
+
+{% block title %}
+  Ventas
+{% endblock %}
+
+{% block content %}
+  <h1 class="h1_global">Historial de ventas</h1>
+  <section class="tabla_global">
+    <div class="botones_superiores">
+      <a href="{% url 'anadir_ventas' %}" class="btn_accion btn_superior">Añadir Venta</a>
+    </div>
+    <div class="overflow-auto">
+      <table class="table table-borderless">
+        <thead>
+          <tr class="titulos_tabla">
+            <th>N° Venta</th>
+            <th>RUT Cliente</th>
+            <th>Fecha</th>
+            <th>Total $</th>
+            <th>Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for venta in ventas %}
+          <tr>
+              <td>{{ venta.id }}</td>
+              <td>{{ venta.rut_cliente }}</td>
+              <td>{{ venta.fecha }}</td>
+              <td>{{ venta.total }}</td>
+              <td>
+                  <a href="{% url 'detalle_venta' venta.id %}"><button class="btn btn_detalle">Ver detalle</button></a>
+                  {% if not venta.has_deleted_products %}
+                      <a href="{% url 'editar_ventas' venta.id %}"><button class="btn btn_editar">Editar</button></a>
+                      
+                  {% else %}
+                      <button class="btn btn_editar" disabled title="No se puede editar porque contiene productos eliminados">Editar</button>
+                      <a href="{% url 'eliminar_venta' venta.id %}"
+                                onclick="return confirm ('¿Esta seguro de que desea eliminar esta venta?');"><button
+                                    class="btn btn_eliminar">Eliminar</button></a>
+                  {% endif %}
+              </td>
+          </tr>
+          {% empty %}
+          <tr>
+              <td colspan="6"> No hay ventas registradas.</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </section>
+{% endblock %}

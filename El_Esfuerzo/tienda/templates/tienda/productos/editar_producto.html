@@ -1,0 +1,44 @@
+{% extends "tienda/base.html" %}
+{% load static %}
+
+{% block title %}
+Editar Productos
+{% endblock %}
+
+{% block content %}
+<h1 class="form_h1_global">Editar Producto</h1>
+<form method="POST" class="form_agregar">
+  {% csrf_token %}
+  <div class="grupo_form">
+    {{ form.nombre.label_tag }}
+    {{ form.nombre }}
+  </div>
+
+  <div class="grupo_form">
+    {{ form.tipo.label_tag }}
+    {{ form.tipo }}
+  </div>
+
+  <div class="grupo_form">
+    {{ form.precio.label_tag }}
+    {{ form.precio }}
+  </div>
+
+  <div class="grupo_form">
+    {{ form.tipo_cantidad.label_tag }}
+    {{ form.tipo_cantidad }}
+  </div>
+
+  <div class="grupo_form">
+    {{ form.cantidad.label_tag }}
+    {{ form.cantidad }}
+  </div>
+
+  <div class="boton_volver">
+    <button type="submit" class="btn btn_agregar">Guardar Cambios</button>
+    <a href="{% url 'producto' %}" class="btn btn-danger">Volver</a>
+  </div>
+
+</form>
+
+{% endblock %}

@@ -1,0 +1,35 @@
+{% extends "tienda/base.html" %}
+{% load static %}
+
+{% block title %}
+    Inicio
+{% endblock %}
+
+{% block content %}
+    <div class="incio_grid">
+        <div class="inicio_card">
+            <img class="icono" src="{% static 'tienda/icons/icono_inventario.svg'%}" alt="Icono de Inventario"> 
+            <h3>Inventario</h3>
+            <p>Gestione el inventario de la Verduleria</p>
+            <a href="{% url 'producto' %}">Ir a inventario</a>
+        </div>
+        <div class="inicio_card">
+            <img class="icono" src="{% static 'tienda/icons/icono_ventas.svg'%}" alt="Icono de Ventas"> 
+            <h3>Ventas</h3>
+            <p>Gestione las ventas de la Verduleria</p>
+            <a href="{% url 'ver_ventas' %}">Ir a ventas</a>
+        </div>
+        <div class="inicio_card">
+            <img class="icono" src="{% static 'tienda/icons/icono_clientes.svg'%}" alt="Icono de Clientes"> 
+            <h3>Clientes</h3>
+            <p>Gestione los clientes de la Verduleria</p>
+            <a href="{% url 'cliente' %}">Ir a clientes</a>
+        </div>
+        <div class="inicio_card">
+            <img class="icono" src="{% static 'tienda/icons/icono_proveedores.svg'%}" alt="Icono de Proveedores"> 
+            <h3>Proveedores</h3>
+            <p>Gestione los proveedores de la Verduleria</p>
+            <a href="{% url 'ver_compras'%}">Ir a proveedores</a>
+        </div>
+    </div>
+{% endblock %}

@@ -1,0 +1,42 @@
+{% extends "tienda/base.html" %}
+{% load static %}
+
+{% block title %}
+  Usuarios
+{% endblock %}
+
+
+{% block content %}
+<h1 class="h1_global">Clientes</h1>
+<section class="tabla_global">
+  <div class="overflow-auto">
+    <table class="table table-borderless">
+      <thead>
+          <tr class="titulos_tabla">
+              <th scope="col">Id Cliente</th>
+              <th scope="col">RUT</th>
+              <th scope="col">Cantidad de Compras</th>
+              <th scope="col">Acciones</th>
+          </tr>
+      </thead>
+      <tbody>
+          {% for cliente in clientes %}
+          <tr>
+              <th>{{ cliente.id }}</th>
+              <td>{{ cliente.rut }}</td>
+              <td>{{ cliente.cantidad_compras }}</td>
+              <td>
+                <a href="{% url 'editar_cliente' cliente.id %}" class="btn btn_editar">Editar</a>
+              </td>
+          </tr>
+          {% empty %}
+          <tr>
+              <td colspan="6"> No hay clientes registrados.</td>
+          </tr>
+          {% endfor %}
+      </tbody>
+  </table>
+  </div>
+</section>
+
+{% endblock %}

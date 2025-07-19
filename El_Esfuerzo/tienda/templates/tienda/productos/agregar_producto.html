@@ -1,0 +1,57 @@
+{% extends "tienda/base.html" %}
+{% load static %}
+
+{% block title %}
+  Agregar Productos
+{% endblock %}
+
+{% block content %}
+<h1 class="form_h1_global">Registrar Producto</h1>
+<form method="POST" class="form_agregar">
+  {% csrf_token %}
+  <div class="grupo_form">
+    <label for="nombre">Nombre</label>
+    <input type="text" id="nombre" name="nombre" required>
+  </div>
+
+  <div class="grupo_form">
+    <label for="tipo">Tipo</label>
+    <select name="tipo" id="tipo" required>
+      <option value=""></option>
+      <option value="verdura">Verdura</option>
+      <option value="fruta">Fruta</option>
+    </select>
+  </div>
+
+  <div class="grupo_form">
+    <label for="precio">Precio</label>
+    <input type="text" id="precio" name="precio" required>
+  </div>
+
+
+  <div class="grupo_form">
+    <label for="tipo_cantidad">Tipo de cantidad</label>
+    <select name="tipo_cantidad" id="tipo_cantidad" required>
+      <option value=""></option>
+      <option value="unt.">Unitario</option>
+      <option value="kilo">Kilo</option>
+      <option value="saco">Saco</option>
+      <option value="malla">Malla</option>
+      <option value="cajon">Cajón</option>
+    </select>
+  </div>
+
+  <div class="grupo_form">
+    <label for="cantidad">Cantidad</label>
+    <input type="text" id="cantidad" name="cantidad" value="0" readonly>
+  </div>
+
+
+  <div class="boton_volver">
+    <button type="submit" class="btn btn_agregar">Agregar Producto</button>
+    <a href="{% url 'producto' %}" class="btn btn-danger">Volver</a>
+  </div>
+  
+</form>
+
+{% endblock %}

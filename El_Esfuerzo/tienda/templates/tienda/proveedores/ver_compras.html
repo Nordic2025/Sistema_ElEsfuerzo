@@ -1,0 +1,54 @@
+{% extends "tienda/base.html" %}
+{% load static %}
+
+{% block title %}
+Compras
+{% endblock %}
+
+{% block content %}
+
+<h1 class="h1_global">Compras</h1>
+<section class="tabla_global">
+    <div class="botones_superiores">
+        <a href="{% url 'ver_proveedor' %}" class="btn_accion btn_superior">Ver Proveedor</a>
+        <a href="{% url 'anadir_compra' %}" class="btn_accion btn_superior">Añadir Compra</a>
+    </div>
+    <div class="overflow-auto">
+        <table class="table table-borderless">
+            <thead>
+                <tr class="titulos_tabla">
+                    <th scope="col">N° Compra</th>
+                    <th scope="col">Proveedor</th>
+                    <th scope="col">Fecha</th>
+                    <th scope="col">Total $</th>
+                    <th scope="col">Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for compra in compras %}
+                <tr>
+                    <td>{{ compra.id }}</td>
+                    <td>{{compra.nombre_proveedor}}</td>
+                    <td>{{compra.fecha}}</td>
+                    <td>{{compra.Total}}</td>
+                    <td>
+                        <a href="{% url 'detalle_compra' compra.id %}"><button
+                            class="btn btn_detalle">Ver detalle</button></a>
+                        <a href="{% url 'editar_compra' compra.id %}"><button
+                                class="btn btn_editar">Editar</button></a>
+                        <a href="{% url 'eliminar_compra' compra.id %}"
+                            onclick="return confirm ('¿Esta seguro de que desea eliminar esta compra? Puede afectar al apartado de Productos.');"><button
+                                class="btn btn_eliminar">Eliminar</button></a>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="6"> No hay compras registradas.</td>
+                </tr>
+                {% endfor %}
+
+            </tbody>
+        </table>
+    </div>
+</section>
+{% endblock %}

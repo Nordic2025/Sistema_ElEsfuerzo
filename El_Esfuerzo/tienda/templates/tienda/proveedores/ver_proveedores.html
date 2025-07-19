@@ -1,0 +1,54 @@
+{% extends "tienda/base.html" %}
+{% load static %}
+
+{% block title %}
+Lista de Proveedores
+{% endblock %}
+
+{% block content %}
+
+<h1 class="h1_global">Lista de Proveedores</h1>
+<section class="tabla_global">
+    <div class="botones_superiores">
+        <a href="{% url 'anadir_proveedor' %}" class="btn_accion btn_superior">Agregar Proveedor</a>
+    </div>
+    <div class="overflow-auto">
+        <table class="table table-borderless">
+            <thead>
+                <tr class="titulos_tabla">
+                    <th scope="col">Nº Proveedor</th>
+                    <th scope="col">Nombre Proveedor</th>
+                    <th scope="col">Telefono o Correo</th>
+                    <th scope="col">Ubicación</th>
+                    <th scope="col">Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for proveedor in proveedores %}
+                <tr>
+                    <td>{{ proveedor.id }}</td> 
+                    <td>{{ proveedor.nombre_proveedor }}</td>
+                    <td>{{ proveedor.Telefono_gmail }}</td>
+                    <td>{{ proveedor.ubicacion }}</td>
+                    <td>
+                        <a href="{% url 'editar_proveedor' proveedor.id %}">
+                            <button class="btn btn_editar">Editar</button>
+                        </a>
+                        <a href="{% url 'eliminar_proveedor' proveedor.id %}"
+                            onclick="return confirm('¿Está seguro de que desea eliminar este proveedor? Puede afectar al apartado de Compras.');">
+                            <button class="btn btn_eliminar">Eliminar</button>
+                        </a>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="6"> No hay proveedores registrados.</td>
+                </tr>
+                {% endfor %}
+
+            </tbody>
+        </table>
+    </div>
+</section>
+
+{% endblock %}

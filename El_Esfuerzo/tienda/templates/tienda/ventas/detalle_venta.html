@@ -1,0 +1,40 @@
+{% extends "tienda/base.html" %}
+{% load static %}
+
+{% block title %}
+Detalle de Venta
+{% endblock %}
+
+{% block content %}
+<div class="detalle">
+    <h2>Detalle de Venta</h2>
+
+    <div class="detalle_info">
+        <p><strong>RUT Cliente:</strong> {{ venta.rut_cliente }}</p>
+        <p><strong>Fecha:</strong> {{ venta.fecha }}</p>
+        <p><strong>Total $:</strong> {{ venta.total }}</p>
+    </div>
+
+    <hr>
+
+    <h3>Productos Vendidos</h3>
+    <ul class="detalle_productos">
+        {% for producto in productos %}
+            <li>
+                <p><strong>Producto:</strong> {{ producto.nombre }}</p>
+                <p><strong>Tipo:</strong> {{ producto.tipo }}</p>
+                <p><strong>Cantidad:</strong> {{ producto.cantidad }} {{ producto.tipo_cantidad }}</p>
+                <p><strong>Subtotal:</strong> ${{ producto.subtotal }}</p>
+            </li>
+        {% endfor %}
+    </ul>
+
+    <div class="detalle_total">
+        <p><strong>Total Venta $:</strong> {{ venta.total }}</p>
+    </div>
+</div>
+<div class="boton_volver">
+    <a href="{% url 'ver_ventas' %}" class="btn btn-danger">Volver</a>
+</div>
+
+{% endblock %}

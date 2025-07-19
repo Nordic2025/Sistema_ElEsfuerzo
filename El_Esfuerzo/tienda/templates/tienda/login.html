@@ -1,0 +1,27 @@
+{% extends 'tienda/base.html' %}
+{% load static %}
+
+{% block title %}
+  Iniciar Sesion
+{% endblock %}
+
+{% block content %}
+  <h1 class="h1_login">Iniciar sesión</h1>
+  <div class="centrar_card">
+    <div class="card">
+        <img src="{% static 'tienda/images/logo.png' %}" alt="Logo Verduleria El Esfuerzo" />
+        <form action="#" method="POST" class="card_body_login">
+            {% csrf_token %}
+            
+            {% if request.GET.next%}
+              <input type="hidden" name="next" value="{{ request.GET.next}}">
+            {% endif %}  
+            <label class="usuario">Usuario</label>
+            <input type="text" class="Login_input" name="username" id="username" placeholder="Ingrese su usuario" />
+            <label class="contraseña">Contraseña:</label>
+            <input type="password" class="Login_input" name="password" id="password" placeholder="Ingrese su contraseña" />
+            <button type="submit" class="btn login_btn">Iniciar sesión</button>
+          </form>
+    </div>
+  </div>
+{% endblock %}

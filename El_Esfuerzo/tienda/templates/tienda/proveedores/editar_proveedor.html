@@ -1,0 +1,37 @@
+{% extends "tienda/base.html" %}
+{% load static %}
+
+{% block title %}
+Editar Proveedor
+{% endblock %}
+
+{% block content %}
+
+<h1 class="form_h1_global">Editar Proveedor</h1>
+
+<form method="POST" class="form_agregar">
+    {% csrf_token %}
+
+    <div class="grupo_form">
+        {{ form.nombre_proveedor.label_tag }}
+        {{ form.nombre_proveedor }}
+    </div>
+
+    <div class="grupo_form">
+        {{ form.Telefono_gmail.label_tag }}
+        {{ form.Telefono_gmail }}
+    </div>
+
+    <div class="grupo_form">
+        {{ form.ubicacion.label_tag }}
+        {{ form.ubicacion }}
+    </div>
+
+    <div class="boton_volver">
+        <button type="submit" class="btn btn_agregar">Guardar Cambios</button>
+        <a href="{% url 'ver_proveedor'%}" class="btn btn-danger">Volver</a>
+    </div>
+    
+</form>
+
+{% endblock %}

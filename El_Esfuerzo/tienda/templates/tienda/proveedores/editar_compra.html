@@ -1,0 +1,171 @@
+{% extends "tienda/base.html" %}
+{% load static %}
+
+{% block title %}
+Editar Compra
+{% endblock %}
+
+{% block content %}
+<h1 class="form_h1_ventas_compras">Editar Compra</h1>
+
+<div class="contenedor-form-grilla">
+    <form method="POST" class="form_agregar" id="compra-form">
+        {% csrf_token %}
+
+        <div class="grupo_form">
+            <label for="nombre_proveedor">Nombre proveedor</label>
+            <select id="nombre_proveedor" name="nombre_proveedor" required>
+                {% for proveedor in form.nombre_proveedor.field.queryset %}
+                <option value="{{ proveedor.id }}" {% if compra.nombre_proveedor == proveedor.nombre_proveedor %}selected{% endif %}>
+                    {{ proveedor.nombre_proveedor }}
+                </option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div class="grupo_form">
+            <label for="fecha">Fecha</label>
+            <input type="date" id="fecha" name="fecha" value="{{ compra.fecha|date:'Y-m-d' }}" required>
+        </div>
+
+        <div class="grupo_form">
+            {{ form.Total.label_tag }}
+            {{ form.Total }}
+        </div>
+
+        <div class="boton_volver">
+            <button type="submit" class="btn btn_agregar">Guardar Cambios</button>
+            <a href="{% url 'ver_compras'%}" class="btn btn-danger">Volver</a>
+        </div>
+        
+    </form>
+    
+    <!-- Grilla de productos -->
+    <table id="productos_grilla" class="table table-striped">
+        <thead class="thead-dark">
+            <tr>
+                <th>Producto</th>
+                <th>Tipo</th>
+                <th>Cantidad</th>
+                <th>Tipo de cantidad</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+        <tbody>
+            <!-- Grilla cargada dinámicamente -->
+        </tbody>
+    </table>
+</div>
+
+<!-- Modal para editar producto -->
+<div id="editarModal" class="modal" style="display:none;">
+    <div class="modal-content">
+        <span id="cerrarModal" class="close">&times;</span>
+        <h2>Editar Producto</h2>
+        <div>
+            <label for="modal_producto">Producto:</label>
+            <input type="text" id="modal_producto" readonly>
+        </div>
+        <div>
+            <label for="modal_tipo">Tipo:</label>
+            <input type="text" id="modal_tipo" readonly>
+        </div>
+        <div>
+            <label for="modal_cantidad">Cantidad:</label>
+            <input type="number" id="modal_cantidad">
+        </div>
+        <div>
+            <label for="modal_tipo_cantidad">Tipo de cantidad:</label>
+            <select id="modal_tipo_cantidad">
+                <option value="unt.">Unidades</option>
+                <option value="kilo">Kilos</option>
+                <option value="saco">Sacos</option>
+                <option value="cajon">Cajones</option>
+                <option value="malla">Mallas</option>
+            </select>
+        </div>
+        <button id="guardarCambios">Guardar</button>
+    </div>
+</div>
+
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        let productoEditando = null;
+        let productosSeleccionados = JSON.parse('{{ productos|escapejs }}');
+
+        function actualizarGrilla() {
+            const tabla = document.getElementById('productos_grilla').getElementsByTagName('tbody')[0];
+            tabla.innerHTML = '';
+
+            productosSeleccionados.forEach(function (producto, index) {
+                let row = tabla.insertRow();
+                row.innerHTML = `
+                    <td>${producto.productoNombre}</td>
+                    <td>${producto.tipo}</td>
+                    <td>${producto.cantidad}</td>
+                    <td>${producto.tipoCantidad}</td>
+                    <td>
+                        <button type="button" class="btn btn_editar" onclick="editarProducto(${index})">Editar</button>
+                        <button type="button" class="btn btn_eliminar" onclick="eliminarProducto(${index})">Eliminar</button>
+                    </td>
+                `;
+            });
+        }
+
+        // Función para abrir el modal
+        window.editarProducto = function (index) {
+            productoEditando = index;
+            const producto = productosSeleccionados[index];
+
+            document.getElementById('modal_producto').value = producto.productoNombre;
+            document.getElementById('modal_tipo').value = producto.tipo;
+            document.getElementById('modal_cantidad').value = producto.cantidad;
+            document.getElementById('modal_tipo_cantidad').value = producto.tipoCantidad;
+
+            document.getElementById('editarModal').style.display = 'flex';
+        };
+
+        // Función para eliminar producto
+        window.eliminarProducto = function (index) {
+            productosSeleccionados.splice(index, 1);
+            actualizarGrilla();
+        };
+
+        // Guardar cambios en el modal
+        document.getElementById('guardarCambios').addEventListener('click', function () {
+            const cantidad = document.getElementById('modal_cantidad').value;
+            const tipoCantidad = document.getElementById('modal_tipo_cantidad').value;
+
+            productosSeleccionados[productoEditando].cantidad = cantidad;
+            productosSeleccionados[productoEditando].tipoCantidad = tipoCantidad;
+
+            actualizarGrilla();
+            cerrarModal();
+        });
+
+        // Cerrar el modal
+        function cerrarModal() {
+            document.getElementById('editarModal').style.display = 'none';
+        }
+        document.getElementById('cerrarModal').addEventListener('click', cerrarModal);
+
+        // Manejar el envío del formulario
+        document.getElementById('compra-form').addEventListener('submit', function (event) {
+            event.preventDefault();
+
+            let productosInput = document.createElement('input');
+            productosInput.type = 'hidden';
+            productosInput.name = 'productos';
+            productosInput.value = JSON.stringify(productosSeleccionados);
+            this.appendChild(productosInput);
+
+            this.submit();
+        });
+
+        // Inicializar la grilla
+        actualizarGrilla();
+    });
+</script>
+
+{% endblock %}

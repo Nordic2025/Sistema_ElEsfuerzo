@@ -1,0 +1,209 @@
+{% extends "tienda/base.html" %}
+{% load static %}
+
+{% block title %}
+Añadir Compras
+{% endblock %}
+
+{% block content %}
+<h1 class="form_h1_ventas_compras">Registrar Compra</h1>
+
+<div class="contenedor-form-grilla">
+
+    <!-- Formulario de compra -->
+    <form method="POST" class="form_agregar" id="compra-form">
+        <div class="info">
+            <div class="info_icono">
+                <svg fill="none" height="20" viewBox="0 0 24 24" width="20" xmlns="http://www.w3.org/2000/svg"><path d="m13 13h-2v-6h2zm0 4h-2v-2h2zm-1-15c-1.3132 0-2.61358.25866-3.82683.7612-1.21326.50255-2.31565 1.23915-3.24424 2.16773-1.87536 1.87537-2.92893 4.41891-2.92893 7.07107 0 2.6522 1.05357 5.1957 2.92893 7.0711.92859.9286 2.03098 1.6651 3.24424 2.1677 1.21325.5025 2.51363.7612 3.82683.7612 2.6522 0 5.1957-1.0536 7.0711-2.9289 1.8753-1.8754 2.9289-4.4189 2.9289-7.0711 0-1.3132-.2587-2.61358-.7612-3.82683-.5026-1.21326-1.2391-2.31565-2.1677-3.24424-.9286-.92858-2.031-1.66518-3.2443-2.16773-1.2132-.50254-2.5136-.7612-3.8268-.7612z" fill="#393a37"></path></svg>    </div>
+            <div class="info_titulo">Si su producto no esta guardado, puede crearlo desde aquí.</div>
+            <a href="{% url 'agregar_producto' %}?next={{ request.path }}" class="btn_administrador">Crear Producto</a>
+        </div>
+        {% csrf_token %}
+        <div class="grupo_form">
+            <label for="nombre_proveedor">Nombre proveedor</label>
+            <select id="nombre_proveedor" name="nombre_proveedor" required>
+                <option value="">Selecciona un proveedor</option>
+                {% for proveedor in form.nombre_proveedor.field.queryset %}
+                <option value="{{ proveedor.id }}">{{ proveedor.nombre_proveedor }}</option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div class="grupo_form">
+            <label for="fecha">Fecha</label>
+            <input type="date" id="fecha" name="fecha" required>
+        </div>
+
+        <div class="grupo_form">
+            <label for="tipo">Tipo del producto</label>
+            <select name="tipo" id="tipo" required>
+                <option value="">Seleccione el tipo</option>
+                <option value="fruta">Fruta</option>
+                <option value="verdura">Verdura</option>
+            </select>
+        </div>
+
+
+
+        <div class="grupo_form">
+            <label for="nombreProducto">Nombre producto</label>
+            <select id="nombreProducto" name="nombreProducto" required>
+                <option value="">Seleccione el producto</option>
+            </select>
+        </div>
+
+        <div class="grupo_form">
+            <label for="tipo_cantidad">Tipo de cantidad</label>
+            <select name="tipo_cantidad" id="tipo_cantidad" required>
+                <option value=""></option>
+                <option value="unt.">Unidades</option>
+                <option value="kilo">Kilo</option>
+                <option value="saco">Saco</option>
+                <option value="malla">Malla</option>
+                <option value="cajon">Cajón</option>
+            </select>
+        </div>
+
+        <div class="grupo_form">
+            <label for="cantidad">Cantidad</label>
+            <input type="number" id="cantidad" name="cantidad" required>
+        </div>
+
+        <button type="button" id="agregar-producto" class="btn btn-secondary" style=" margin-bottom: 30px;">Agregar a la compra</button>
+
+        <div class="grupo_form">
+            <label for="Total">Total de la Compra</label>
+            <input type="number" id="Total" name="Total" required>
+        </div>
+
+        <div class="boton_volver">
+            <button type="submit" class="btn btn_agregar">Finalizar Compra</button>
+            <a href="{% url 'ver_compras'%}" class="btn btn-danger">Volver</a>
+        </div>
+    </form>
+
+
+
+    <!-- Grilla de productos -->
+    <table id="productos_grilla" class="table table-striped">
+        <thead class="thead-dark">
+            <tr>
+                <th>Producto</th>
+                <th>Tipo</th>
+                <th>Cantidad</th>
+                <th>Tipo de cantidad</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+        <tbody>
+            <!-- Aquí se van agregando los productos dinámicamente -->
+        </tbody>
+    </table>
+</div>
+
+
+<script>
+    $(document).ready(function () {
+        // Inicializa Select2 en el campo del nombre del producto
+        $('#nombreProducto').select2({
+            placeholder: 'Seleccione o busque un producto',
+            allowClear: true
+        });
+
+        // Función para filtrar productos por tipo
+        $('#tipo').on('change', function () {
+            const tipoProducto = $(this).val();
+
+            // Limpia el select de nombreProducto
+            $('#nombreProducto').empty().append('<option value="">Seleccione el producto</option>');
+
+            // Realiza la solicitud AJAX para obtener productos según el tipo
+            if (tipoProducto) {
+                $.ajax({
+                    url: '/obtener_productos/',
+                    method: 'GET',
+                    data: { tipo: tipoProducto },
+                    success: function (response) {
+                        // Agrega cada producto al select
+                        response.productos.forEach(function (producto) {
+                            $('#nombreProducto').append(new Option(producto.nombre, producto.id));
+                        });
+                    },
+                    error: function () {
+                        alert('Hubo un error al cargar los productos. Intente nuevamente.');
+                    }
+                });
+            }
+        });
+    });
+
+
+
+    document.addEventListener('DOMContentLoaded', function () {
+        let productosSeleccionados = [];
+
+        // Función para agregar el producto a la grilla
+        document.getElementById('agregar-producto').addEventListener('click', function () {
+            let productoId = document.getElementById('nombreProducto').value;
+            let productoNombre = document.querySelector('#nombreProducto option:checked').text;
+            let tipo = document.querySelector('#tipo option:checked').text
+            let cantidad = document.getElementById('cantidad').value;
+            let tipoCantidad = document.getElementById('tipo_cantidad').value;
+
+            if (productoId && tipo && cantidad && tipoCantidad) {
+                // Agregar el producto a la lista de productos seleccionados
+                productosSeleccionados.push({ productoId, productoNombre, tipo, cantidad, tipoCantidad });
+                actualizarGrilla();
+            } else {
+                alert('Por favor, seleccione un producto y complete la cantidad y el tipo.');
+            }
+        });
+
+        // Función para actualizar la grilla con los productos seleccionados
+        function actualizarGrilla() {
+            const tabla = document.getElementById('productos_grilla').getElementsByTagName('tbody')[0];
+            tabla.innerHTML = ''; 
+
+            productosSeleccionados.forEach(function (producto, index) {
+                let row = tabla.insertRow();
+                row.innerHTML = `
+                <td>${producto.productoNombre}</td>
+                <td>${producto.tipo}</td>
+                <td>${producto.cantidad}</td>
+                <td>${producto.tipoCantidad}</td>
+                <td><button type="button" class="btn btn_eliminar" onclick="eliminarProducto(${index})">Eliminar</button></td>
+            `;
+            });
+        }
+
+        // Función para eliminar un producto de la grilla
+        window.eliminarProducto = function (index) {
+            productosSeleccionados.splice(index, 1);
+            actualizarGrilla();
+        }
+
+        // Cuando se envíe el formulario, añadir los productos seleccionados al request
+        document.getElementById('compra-form').addEventListener('submit', function (event) {
+            // Evitar que el formulario se envíe de inmediato
+            event.preventDefault();
+
+            // Agregar los productos al formulario antes de enviarlo
+            let productosInput = document.createElement('input');
+            productosInput.type = 'hidden';
+            productosInput.name = 'productos';
+            productosInput.value = JSON.stringify(productosSeleccionados);  
+            this.appendChild(productosInput);
+
+
+            // Log para verificar los datos antes de enviarlos
+            console.log("Datos de productos a enviar:", productosInput.value);
+
+
+            // Enviar el formulario
+            this.submit();
+        });
+    });
+
+</script>
+
+{% endblock %}

@@ -1,0 +1,195 @@
+{% extends "tienda/base.html" %}
+{% load static %}
+
+{% block title %}
+Editar Venta
+{% endblock %}
+
+{% block content %}
+<h1 class="form_h1_ventas_compras">Editar Venta</h1>
+
+<div class="contenedor-form-grilla">
+    <form method="POST" class="form_agregar" id="venta-form">
+        {% csrf_token %}
+
+        <div class="grupo_form">
+            <label for="rut_cliente">RUT Cliente</label>
+            <input type="text" id="rut_cliente" name="rut_cliente" value="{{ venta.rut_cliente }}" readonly>
+        </div>
+
+        <div class="grupo_form">
+            <label for="fecha">Fecha</label>
+            <input type="date" id="fecha" name="fecha" value="{{ venta.fecha|date:'Y-m-d' }}" readonly>
+        </div>
+        
+        <div class="grupo_form">
+            {{ form.Total.label_tag }}
+            {{ form.Total }}
+        </div>
+        
+        <div class="boton_volver">
+            <button type="submit" class="btn btn_agregar">Guardar Cambios</button>
+            <a href="{% url 'ver_ventas' %}" class="btn btn-danger">Volver</a>
+        </div>
+    </form>
+
+    <table id="productos_grilla" class="table table-striped">
+        <thead class="thead-dark">
+            <tr>
+                <th>Producto</th>
+                <th>Tipo</th>
+                <th>Cantidad</th>
+                <th>Tipo de cantidad</th>
+                <th>Subtotal</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+        <tbody>
+        </tbody>
+        <tfoot>
+            <tr>
+                <td colspan="4" class="text-right"><strong>Total:</strong></td>
+                <input type="hidden" id="id_Total" name="Total" value="0">
+                <td id="total-venta">$0</td>
+            </tr>
+        </tfoot>
+    </table>
+</div>
+
+<!-- Modal para editar producto -->
+<div id="editarModal" class="modal" style="display:none;">
+    <div class="modal-content">
+        <span id="cerrarModal" class="close">&times;</span>
+        <h2>Editar Producto</h2>
+        <div>
+            <label for="modal_producto">Producto:</label>
+            <input type="text" id="modal_producto" readonly>
+        </div>
+        <div>
+            <label for="modal_tipo">Tipo:</label>
+            <input type="text" id="modal_tipo" readonly>
+        </div>
+        <div>
+            <label for="modal_cantidad">Cantidad:</label>
+            <input type="number" id="modal_cantidad" step="0.01" min="0.01">
+        </div>
+        <div>
+            <label for="modal_tipo_cantidad">Tipo de cantidad:</label>
+            <select id="modal_tipo_cantidad">
+                <option value="unt.">Unidades</option>
+                <option value="kilo">Kilos</option>
+                <option value="saco">Sacos</option>
+                <option value="cajon">Cajones</option>
+                <option value="malla">Mallas</option>
+            </select>
+        </div>
+        <button id="guardarCambios" class="btn btn_agregar">Guardar</button>
+    </div>
+</div>
+
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        let productoEditando = null;
+        let productosSeleccionados = JSON.parse('{{ productos|escapejs }}');
+
+        function actualizarGrilla() {
+            const tabla = document.getElementById('productos_grilla').getElementsByTagName('tbody')[0];
+            tabla.innerHTML = '';
+            let totalVenta = 0;
+
+            productosSeleccionados.forEach(function (producto, index) {
+                let subtotal = parseFloat(producto.cantidad) * parseFloat(producto.precio);
+                totalVenta += subtotal;
+
+                let row = tabla.insertRow();
+                row.innerHTML = `
+                    <td>${producto.productoNombre}</td>
+                    <td>${producto.tipo}</td>
+                    <td>${producto.cantidad}</td>
+                    <td>${producto.tipoCantidad}</td>
+                    <td>${subtotal.toFixed(2)}</td>
+                    <td>
+                        <button type="button" onclick="editarProducto(${index})" class="btn btn_editar">Editar</button>
+                        <button type="button" onclick="eliminarProducto(${index})" class="btn btn_eliminar">Eliminar</button>
+                    </td>
+                `;
+            });
+
+            document.getElementById('id_Total').value = totalVenta;
+            document.getElementById('total-venta').textContent = `$${totalVenta.toFixed(2)}`;
+        }
+
+        window.editarProducto = function (index) {
+            productoEditando = index;
+            const producto = productosSeleccionados[index];
+
+            document.getElementById('modal_producto').value = producto.productoNombre;
+            document.getElementById('modal_tipo').value = producto.tipo;
+            document.getElementById('modal_cantidad').value = producto.cantidad;
+            document.getElementById('modal_tipo_cantidad').value = producto.tipoCantidad;
+
+            document.getElementById('editarModal').style.display = 'flex';
+        };
+
+        window.eliminarProducto = function (index) {
+            if (confirm('¿Está seguro de eliminar este producto?')) {
+                productosSeleccionados.splice(index, 1);
+                actualizarGrilla();
+            }
+        };
+
+        document.getElementById('guardarCambios').addEventListener('click', function () {
+            const cantidad = parseFloat(document.getElementById('modal_cantidad').value);
+            const tipoCantidad = document.getElementById('modal_tipo_cantidad').value;
+
+            if (!cantidad || cantidad <= 0) {
+                alert('Por favor ingrese una cantidad válida');
+                return;
+            }
+
+            productosSeleccionados[productoEditando].cantidad = cantidad;
+            productosSeleccionados[productoEditando].tipoCantidad = tipoCantidad;
+            productosSeleccionados[productoEditando].subtotal = 
+                productosSeleccionados[productoEditando].precio * cantidad;
+
+            actualizarGrilla();
+            document.getElementById('editarModal').style.display = 'none';
+        });
+
+        document.getElementById('cerrarModal').addEventListener('click', function () {
+            document.getElementById('editarModal').style.display = 'none';
+        });
+
+        document.getElementById('venta-form').addEventListener('submit', function (event) {
+            event.preventDefault();
+            
+            if (productosSeleccionados.length === 0) {
+                alert('Debe agregar al menos un producto a la venta');
+                return;
+            }
+
+            try {
+                let productosInput = document.createElement('input');
+                productosInput.type = 'hidden';
+                productosInput.name = 'productos';
+                productosInput.value = JSON.stringify(productosSeleccionados);
+                
+                let totalInput = document.createElement('input');
+                totalInput.type = 'hidden';
+                totalInput.name = 'total';
+                totalInput.value = document.getElementById('id_Total').value;
+                
+                this.appendChild(productosInput);
+                this.appendChild(totalInput);
+                this.submit();
+            } catch (error) {
+                console.error('Error al enviar el formulario:', error);
+                alert('Error al guardar la venta: ' + error.message);
+            }
+        });
+
+        actualizarGrilla();
+    });
+</script>
+{% endblock %}

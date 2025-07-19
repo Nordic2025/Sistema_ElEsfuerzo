@@ -1,0 +1,37 @@
+{% extends "tienda/base.html" %}
+{% load static %}
+
+{% block title %}
+Añadir Proveedor
+{% endblock %}
+
+{% block content %}
+
+<h1 class="form_h1_global">Registrar Proveedor</h1>
+<form method="POST" class="form_agregar">
+    {% csrf_token %}
+    <div class="grupo_form">
+        <label for="nombreProveedor">Nombre</label>
+        <input type="text" id="nombreProveedor" name="nombre_proveedor" required>
+    </div>
+
+    <div class="grupo_form">
+        <label for="Telefono_gmail">Teléfono o Correo</label>
+        <input type="text" id="Telefono_gmail" name="Telefono_gmail" required>
+    </div>
+
+    <div class="grupo_form">
+        <label for="ubicacion">Ubicación</label>
+        <input type="text" id="ubicacion" name="ubicacion" required>
+    </div>
+
+
+    <div class="boton_volver">
+        <button type="submit" class="btn btn_agregar">Agregar Proveedor</button> 
+        <a href="{% url 'ver_proveedor'%}" class="btn btn-danger">Volver</a>
+    </div>
+    
+</form>
+
+
+{% endblock %}

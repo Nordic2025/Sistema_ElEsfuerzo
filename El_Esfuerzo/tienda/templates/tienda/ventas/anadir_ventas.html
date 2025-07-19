@@ -1,0 +1,241 @@
+{% extends "tienda/base.html" %}
+{% load static %}
+
+{% block title %}
+Añadir Venta
+{% endblock %}
+
+{% block content %}
+<h1 class="form_h1_ventas_compras">Registrar Venta</h1>
+
+<div class="contenedor-form-grilla">
+    <form id="venta-form" method="POST" class="form_agregar">
+        {% csrf_token %}
+
+        <div class="grupo_form">
+            <label for="rut_cliente">RUT Cliente:</label>
+            {{ form.rut_cliente }}
+        </div>
+
+        <div class="grupo_form">
+            <label for="tipo">Tipo de Producto:</label>
+            <select id="tipo" name="tipo" class="form-control" required>
+                <option value="">Seleccione el tipo</option>
+                {% for tipo in tipos_producto %}
+                <option value="{{ tipo.0 }}">{{ tipo.1 }}</option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div class="grupo_form">
+            <label for="nombreProducto">Nombre del Producto:</label>
+            <select id="nombreProducto" name="nombreProducto" class="form-control" required>
+                <option value="">Seleccione el producto</option>
+            </select>
+        </div>
+
+        <div class="grupo_form">
+            <label for="precio_unitario">Precio Unitario:</label>
+            <input type="number" id="precio_unitario" class="form-control" readonly>
+        </div>
+
+        <div class="grupo_form">
+            <label for="cantidad">Cantidad:</label>
+            <input type="number" id="cantidad" name="cantidad" class="form-control" min="0.01" step="0.01" required>
+        </div>
+
+        <div class="grupo_form">
+            <label for="tipo_cantidad">Tipo de Cantidad:</label>
+            <select id="tipo_cantidad" name="tipo_cantidad" class="form-control" required>
+                <option value="">Seleccione el tipo de cantidad</option>
+                {% for tipo in tipos_cantidad %}
+                <option value="{{ tipo.0 }}">{{ tipo.1 }}</option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div class="grupo_form">
+            <label for="subtotal">Subtotal:</label>
+            <input type="text" id="subtotal" class="form-control" readonly>
+        </div>
+
+        <button type="button" id="agregar-producto" class="btn btn-secondary" style="margin-bottom: 30px;">Agregar a la
+            venta</button>
+
+    
+        <div class="boton_volver">
+            <button type="submit" class="btn btn_agregar">Guardar Venta</button>
+            <a href="{% url 'ver_ventas' %}" class="btn btn-danger">Volver</a>
+        </div>
+    </form>
+    
+
+    <table id="productos_grilla" class="table">
+        <thead>
+            <tr>
+                <th>Producto</th>
+                <th>Tipo</th>
+                <th>Cantidad</th>
+                <th>Precio Unitario</th>
+                <th>Subtotal</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+        <tbody>
+        </tbody>
+        <tfoot>
+            <tr>
+                <td colspan="4" class="text-right"><strong>Total:</strong></td>
+                <td id="total-venta">$0</td>
+                <td></td>
+            </tr>
+        </tfoot>
+    </table>
+</div>
+</form>
+</div>
+
+
+<script>
+    $(document).ready(function () {
+        $('#nombreProducto').select2({
+            placeholder: 'Seleccione o busque un producto',
+            allowClear: true
+        });
+
+        let totalVenta = 0;
+
+        $('#tipo').on('change', function () {
+            const tipoProducto = $(this).val();
+            $('#nombreProducto').empty().append('<option value="">Seleccione el producto</option>');
+
+            if (tipoProducto) {
+                $.ajax({
+                    url: '/obtener_productos/',
+                    method: 'GET',
+                    data: { tipo: tipoProducto },
+                    success: function (response) {
+                        response.productos.forEach(function (producto) {
+                            $('#nombreProducto').append(new Option(producto.nombre, producto.id));
+                        });
+                    }
+                });
+            }
+        });
+
+        $('#nombreProducto').on('change', function () {
+            const productoId = $(this).val();
+            if (productoId) {
+                $.ajax({
+                    url: '/obtener_precio_producto/',
+                    method: 'GET',
+                    data: { producto_id: productoId },
+                    success: function (response) {
+                        $('#precio_unitario').val(response.precio);
+                        calcularSubtotal();
+                    }
+                });
+            }
+        });
+
+        $('#cantidad').on('input', calcularSubtotal);
+
+        function calcularSubtotal() {
+            const cantidad = parseFloat($('#cantidad').val()) || 0;
+            const precioUnitario = parseFloat($('#precio_unitario').val()) || 0;
+            const subtotal = cantidad * precioUnitario;
+            $('#subtotal').val(subtotal.toFixed(2));
+        }
+
+        let productosSeleccionados = [];
+
+        document.getElementById('agregar-producto').addEventListener('click', function () {
+            const productoId = $('#nombreProducto').val();
+            const productoNombre = $('#nombreProducto option:selected').text();
+            const tipo = $('#tipo option:selected').text();
+            const cantidad = parseFloat($('#cantidad').val());
+            const tipoCantidad = $('#tipo_cantidad').val();
+            const precioUnitario = parseFloat($('#precio_unitario').val());
+
+            // Validación solo para agregar productos
+            if (!productoId || !cantidad || !tipoCantidad) {
+                alert('Por favor complete todos los campos del producto');
+                return;
+            }
+
+            const subtotal = cantidad * precioUnitario;
+            productosSeleccionados.push({
+                productoId,
+                productoNombre,
+                tipo,
+                cantidad,
+                tipoCantidad,
+                precioUnitario,
+                subtotal
+            });
+            actualizarGrilla();
+        });
+
+        function actualizarGrilla() {
+            const tabla = document.getElementById('productos_grilla').getElementsByTagName('tbody')[0];
+            tabla.innerHTML = '';
+            totalVenta = 0;
+
+            productosSeleccionados.forEach(function (producto, index) {
+                totalVenta += producto.subtotal;
+                let row = tabla.insertRow();
+                row.innerHTML = `
+                    <td>${producto.productoNombre}</td>
+                    <td>${producto.tipo}</td>
+                    <td>${producto.cantidad} ${producto.tipoCantidad}</td>
+                    <td>$${producto.precioUnitario}</td>
+                    <td>$${producto.subtotal.toFixed(2)}</td>
+                    <td><button type="button" class="btn btn_eliminar" onclick="eliminarProducto(${index})">Eliminar</button></td>
+                `;
+            });
+
+            document.getElementById('total-venta').textContent = `$${totalVenta.toFixed(2)}`;
+        }
+
+        window.eliminarProducto = function (index) {
+            productosSeleccionados.splice(index, 1);
+            actualizarGrilla();
+        }
+
+        document.getElementById('venta-form').addEventListener('submit', function (event) {
+            event.preventDefault();
+
+            // Validación para guardar la venta
+            if (productosSeleccionados.length === 0) {
+                alert('Debe agregar al menos un producto a la venta');
+                return;
+            }
+
+            // Validar solo el RUT del cliente
+            const rutCliente = document.getElementById('id_rut_cliente').value;
+            if (!rutCliente) {
+                alert('Por favor ingrese el RUT del cliente');
+                return;
+            }
+
+            // Remover temporalmente los required para permitir el envío
+            const campos = ['tipo', 'nombreProducto', 'cantidad', 'tipo_cantidad'];
+            campos.forEach(campo => {
+                const elemento = document.getElementById(campo);
+                if (elemento) {
+                    elemento.removeAttribute('required');
+                }
+            });
+
+            let productosInput = document.createElement('input');
+            productosInput.type = 'hidden';
+            productosInput.name = 'productos';
+            productosInput.value = JSON.stringify(productosSeleccionados);
+            this.appendChild(productosInput);
+
+            this.submit();
+        });
+    });
+</script>
+
+{% endblock %}

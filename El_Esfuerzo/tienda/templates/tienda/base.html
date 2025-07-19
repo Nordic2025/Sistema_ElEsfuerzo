@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+{% load static %}
+
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="stylesheet" href="{% static 'tienda/css/bootstrap.min.css' %}">
+    <link rel="stylesheet" href="{% static 'tienda/css/sweetalert2.min.css' %}">
+    <link rel="stylesheet" href="{% static 'tienda/css/styles.css' %}">
+    <script src="{% static 'tienda/js/bootstrap.bundle.min.js' %}"></script>
+    <script src="{% static 'tienda/js/sweetalert2.all.min.js' %}"></script>
+    <link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/css/select2.min.css" rel="stylesheet" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/js/select2.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+
+
+    <title>{% block title %}
+        Verdulería El Esfuerzo
+        {% endblock %}</title>
+</head>
+
+<body>
+    <main>
+        <div>
+            <header class="header">
+                <div class="header-content">
+                    <p class="header_titulo">Verdulería El Esfuerzo</p>
+                    {% if request.resolver_match.url_name != 'principal' and request.resolver_match.url_name != 'login' %}
+                    <nav class="main-nav">
+                        <button class="menu-toggle" aria-label="Abrir menú">
+                            <span class="bar"></span>
+                            <span class="bar"></span>
+                            <span class="bar"></span>
+                        </button>
+                        <ul class="menu">
+                            <li><a href="{% url 'principal' %}" class="{% if request.resolver_match.url_name == 'principal' %}active{% endif %}">Inicio</a></li>
+                            <li><a href="{% url 'producto'%}" class="{% if request.resolver_match.url_name == 'producto' %}active{% endif %}">Productos</a></li>
+                            <li><a href="{% url 'ver_ventas'%}" class="{% if request.resolver_match.url_name == 'ver_ventas' %}active{% endif %}">Ventas</a></li>
+                            <li><a href="{% url 'cliente' %}" class="{% if request.resolver_match.url_name == 'cliente' %}active{% endif %}">Clientes</a></li>
+                            <li><a href="{% url 'ver_compras'%}" class="{% if request.resolver_match.url_name == 'ver_compras' %}active{% endif %}">Proveedores</a></li>
+                        </ul>
+                    </nav>
+                    {% endif %}
+                    {% if user.is_authenticated and request.resolver_match.url_name != 'login' %}
+                    <div class="cerrarsesioncontent">
+                        <img src="{% static 'tienda/images/logo.png'%}" alt="Logo Verduleria" class="logo">
+                        <form method="POST" action="{% url 'logout' %}" class="cerrarsesionform">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-danger">Cerrar Sesión</button>
+                        </form>
+                    </div>
+                    {% endif %}
+                </div>
+            </header>
+            <div class="espacio">
+                <div class="espacio2">
+                {% block content %}
+
+                {% endblock%}
+                </div>
+
+            </div>
+           
+        </div>
+    </main>
+
+    <script src="{% static 'tienda/js/script.js'%}"></script>
+    
+    {% if messages %}
+        {% for message in messages %}
+            <script>
+                mensaje('{{ message.tags }}', '{{ message }}');
+            </script>
+        {% endfor %}
+
+    {% endif %}
+
+</body>
+
+</html>
+
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const menuToggle = document.querySelector('.menu-toggle');
+    const menu = document.querySelector('.menu');
+
+    menuToggle.addEventListener('click', function() {
+        menu.classList.toggle('active');
+    });
+});
+</script>

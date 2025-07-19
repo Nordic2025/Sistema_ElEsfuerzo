@@ -1,0 +1,27 @@
+{% extends "tienda/base.html" %}
+{% load static %}
+
+{% block title %}
+    Editar Cliente
+{% endblock %}
+
+{% block content %}
+<div>
+    <h1 class="form_h1_global">Editar Cliente</h1>
+    <div>
+        <div class="grupo_form">
+            <form method="POST" class="form_agregar">
+                {% csrf_token %}
+                <p class="contraseña_usuario" style="color: white;">RUT</p>
+                <input type="text" class="editar_usuario_input" name="rut" value="{{ cliente.rut }}" required>
+                <div class="boton_volver">
+                    <button type="submit" class="btn btn_agregar">Guardar Cambios</button>
+                    <a href="javascript:history.back()" class="btn btn-danger">Volver</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+
+{% endblock %}
