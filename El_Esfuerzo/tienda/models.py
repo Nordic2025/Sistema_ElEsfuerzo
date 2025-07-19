@@ -1,9 +1,8 @@
 from django.db import models # type: ignore
-from django.core.validators import RegexValidator
+from django.core.validators import RegexValidator # type: ignore
 
 
-# Create your models here.
-#Modelo Productos
+# Modelo Productos
 class Productos(models.Model):
     OPCIONES_TIPO = [
         ('verdura', 'Verdura'),
@@ -31,8 +30,7 @@ class Productos(models.Model):
 
     
 
-#Proveedores
-
+# Modelo Proveedores
 class Proveedores(models.Model):
     nombre_proveedor = models.CharField(max_length=100)
     Telefono_gmail = models.CharField(max_length=100)
@@ -86,7 +84,7 @@ class ProductoCompra(models.Model):
 
 
 
-
+# Modelo Ventas
 class Ventas(models.Model):
     fecha = models.DateField(auto_now_add=True)
     rut_cliente = models.CharField(max_length=12,
@@ -101,6 +99,7 @@ class Ventas(models.Model):
     def __str__(self):
         return f"Venta {self.id} - {self.fecha}"
 
+
 class ProductoVenta(models.Model):
     venta = models.ForeignKey(Ventas, on_delete=models.CASCADE, related_name='productos')
     producto = models.ForeignKey('Productos', on_delete=models.SET_NULL, null=True, blank=True)
@@ -113,7 +112,7 @@ class ProductoVenta(models.Model):
     
 
 
-
+# Modelo Ventas
 class Clientes(models.Model):
     rut = models.CharField(max_length=12, unique=True,
         validators=[
